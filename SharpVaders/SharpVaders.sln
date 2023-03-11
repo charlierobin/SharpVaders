@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 25.0.1705.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharpVaders", "SharpVaders\SharpVaders.csproj", "{3A2CC38A-B7E5-4E4E-8D99-47F4B75AB2DC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3A2CC38A-B7E5-4E4E-8D99-47F4B75AB2DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3A2CC38A-B7E5-4E4E-8D99-47F4B75AB2DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3A2CC38A-B7E5-4E4E-8D99-47F4B75AB2DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3A2CC38A-B7E5-4E4E-8D99-47F4B75AB2DC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C4DF0EA3-BDE5-411A-B853-11903BAD41FA}
+	EndGlobalSection
+EndGlobal
