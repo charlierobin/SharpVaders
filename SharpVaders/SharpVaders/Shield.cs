@@ -1,26 +1,48 @@
 ﻿using System;
 using AppKit;
 using CoreGraphics;
+using Foundation;
 using SpriteKit;
 
 namespace SharpVaders
 {
     public class Shield : SKSpriteNode
     {
-        public Shield(int x, int y)
+        public Shield(SceneGame game, int x, int y) : base()
         {
-            SKShapeNode shield = SKShapeNode.FromRect(new CGRect(0, 0, 200, 10));
-            shield.FillColor = NSColor.White;
-            shield.Position = new CGPoint(-100, -5);
+            this.Name = "Shield";
 
-            this.Add(shield);
+            //SKSpriteNode brick = SKSpriteNode.FromTexture(SKTexture.FromImageNamed(NSBundle.MainBundle.PathForResource("pixel", "png")));
 
-            this.PhysicsBody = SKPhysicsBody.CreateRectangularBody(shield.Frame.Size);
-            //this.PhysicsBody.Dynamic = true;
-            this.PhysicsBody.AffectedByGravity = false;
-            this.PhysicsBody.CategoryBitMask = (uint)Types.Shield;
-            this.PhysicsBody.CollisionBitMask = 0;
-            this.PhysicsBody.ContactTestBitMask = (uint)Types.EnemyBullet + (uint)Types.Bullet;
+            //brick.PhysicsBody = SKPhysicsBody.CreateRectangularBody(brick.Frame.Size);
+            //brick.PhysicsBody.AffectedByGravity = false;
+
+            //brick.PhysicsBody.CategoryBitMask = (uint)Types.Shield;
+            //brick.PhysicsBody.CollisionBitMask = 0;
+
+            for (int row = 0; row < 5; row++)
+            {
+                for (int column = 0; column < 10; column++)
+                {
+                    //SKSpriteNode b = (SKSpriteNode)brick.Copy();
+
+                    SKSpriteNode b = SKSpriteNode.FromTexture(SKTexture.FromImageNamed(NSBundle.MainBundle.PathForResource("pixel", "png")));
+
+                    b.PhysicsBody = SKPhysicsBody.CreateCircularBody(b.Frame.Size.Width / 2);
+                    b.PhysicsBody.AffectedByGravity = false;
+
+                    b.PhysicsBody.CategoryBitMask = (uint)Types.Shield;
+                    b.PhysicsBody.CollisionBitMask = 0;
+
+                    b.SetScale(0.3f);
+
+                    this.Add(b);
+
+                    b.Position = new CGPoint(column * b.Frame.Width, row * b.Frame.Height);
+                }
+            }
+
+            //game.Add(this);
 
             this.Position = new CGPoint(x, y);
         }

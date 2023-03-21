@@ -3,11 +3,13 @@ namespace SharpVaders
 {
 	public enum Types
 	{
-        Bullet = 1,
+        Nothing = 0,
+        PlayerBullet = 1,
         Enemy = 2,
         Player = 4,
         EnemyBullet = 8,
-        Shield = 16
+        Shield = 16,
+        FlyingSaucer = 32
     }
 }
 

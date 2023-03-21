@@ -1,3 +1,6 @@
+crash/*
+.editorconfig
+
 # globs
 Makefile.in
 *.userprefs

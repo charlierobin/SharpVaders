@@ -26,7 +26,12 @@
     <IncludeMonoRuntime>false</IncludeMonoRuntime>
     <UseSGen>true</UseSGen>
     <UseRefCounting>true</UseRefCounting>
-    <AOTMode></AOTMode>
+    <LinkMode>None</LinkMode>
+    <CodesignProvision></CodesignProvision>
+    <PackageSigningKey>3rd Party Mac Developer Installer</PackageSigningKey>
+    <EnableCodeSigning>False</EnableCodeSigning>
+    <PlatformTarget>x86</PlatformTarget>
+    <XamMacArch>x86_64</XamMacArch>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -41,7 +46,6 @@
     <UseRefCounting>true</UseRefCounting>
     <CodesignEntitlements>Entitlements.plist</CodesignEntitlements>
     <LinkMode>SdkOnly</LinkMode>
-    <AOTMode></AOTMode>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
@@ -84,21 +88,33 @@
     <Folder Include="Resources\" />
     <Folder Include="graphics\" />
     <Folder Include="fonts\" />
+    <Folder Include="help\" />
   </ItemGroup>
   <ItemGroup>
     <BundleResource Include="SceneIntroMenu.sks" />
     <BundleResource Include="graphics\title.png" />
-    <BundleResource Include="graphics\Bullet.png" />
     <BundleResource Include="graphics\buttonHighScores.png" />
     <BundleResource Include="graphics\buttonNewGame.png" />
     <BundleResource Include="graphics\buttonQuit.png" />
     <BundleResource Include="graphics\buttonSubmitHighScore.png" />
-    <BundleResource Include="graphics\Enemy.png" />
-    <BundleResource Include="graphics\Spaceship.png" />
     <BundleResource Include="SceneGame.sks" />
     <BundleResource Include="SceneHighScores.sks" />
     <BundleResource Include="fonts\RetroBitmap.ttf" />
     <BundleResource Include="SceneEnterNewHighScore.sks" />
+    <BundleResource Include="help\index.html" />
+    <BundleResource Include="ExplosionParticleEffect.sks" />
+    <BundleResource Include="graphics\enemies\bomb.png" />
+    <BundleResource Include="pixel.png" />
+    <BundleResource Include="graphics\player.png" />
+    <BundleResource Include="graphics\bullet.png" />
+    <BundleResource Include="graphics\enemies\saucer.png" />
+    <BundleResource Include="graphics\enemies\enemy-1-alt.png" />
+    <BundleResource Include="graphics\enemies\enemy-1.png" />
+    <BundleResource Include="graphics\enemies\enemy-2-alt.png" />
+    <BundleResource Include="graphics\enemies\enemy-2.png" />
+    <BundleResource Include="graphics\enemies\enemy-3-alt.png" />
+    <BundleResource Include="graphics\enemies\enemy-3.png" />
+    <BundleResource Include="PlayerExplosionParticleEffect.sks" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Info.plist" />
@@ -124,6 +140,19 @@
     <Compile Include="HighScoreEntry.cs" />
     <Compile Include="Shield.cs" />
     <Compile Include="SceneEnterNewHighScore.cs" />
+    <Compile Include="FlyingSaucer.cs" />
+    <Compile Include="ExtensionsToRandom.cs" />
+    <Compile Include="Enemy.cs" />
+    <Compile Include="Enemy1.cs" />
+    <Compile Include="Enemy2.cs" />
+    <Compile Include="Enemy3.cs" />
+    <Compile Include="Wave.cs" />
+    <Compile Include="Explosion.cs" />
+    <Compile Include="FlyingSaucers.cs" />
+    <Compile Include="UI.cs" />
+    <Compile Include="ExtensionsToNSObject.cs" />
+    <Compile Include="Player.cs" />
+    <Compile Include="Shields.cs" />
   </ItemGroup>
   <ItemGroup>
     <InterfaceDefinition Include="MainMenu.xib" />

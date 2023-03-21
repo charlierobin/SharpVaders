@@ -1,34 +1,52 @@
 ﻿using System;
+using System.Collections.Generic;
 
 using AppKit;
 using SpriteKit;
 using Foundation;
 using CoreGraphics;
+using GameKit;
 
 namespace SharpVaders
 {
     public class SceneGame : Scene
     {
-        private Random random = new Random();
+        public Random random = new Random();
 
-        private int score;
-        private int lives = 10;
+        private int _score = 0;
+        private int _lives = 1;
 
-        private SKLabelNode scoreUI;
-        private SKLabelNode livesUI;
+        private UI ui;
 
-        private SKSpriteNode player;
-        private SKSpriteNode bullet;
+        public int score
+        {
+            get { return this._score; }
+            set
+            {
+                this._score = value;
+                this.ui.update(this._score, this._lives);
+            }
+        }
 
-        private bool leftPressed = false;
-        private bool rightPressed = false;
-        private bool firePressed = false;
+        public int lives
+        {
+            get { return this._lives; }
 
-        private SKSpriteNode enemy;
+            set
+            {
+                this._lives = value;
 
-        private float speed = 600;
+                this.ui.update(this._score, this._lives);
+            }
+        }
 
+        private Player player;
+        private Shields shields;
+        private Wave wave;
+        
         private double lastTime;
+
+        //private List<SKNode> toRemove = new List<SKNode>();
 
         public SceneGame(IntPtr handle) : base(handle) { }
 
@@ -36,149 +54,39 @@ namespace SharpVaders
         {
             this.PhysicsWorld.ContactDelegate = new ContactDelegate(this);
 
-            this.setupUI();
+            this.ui = new UI(this, this.score, this.lives);
 
-            this.refreshShields();
+            this.Add(this.ui);
 
-            this.spawnNewPlayer();
+            this.player = new Player(this);
 
-            this.spawnNewEnemy();
-        }
+            this.shields = new Shields(this);
 
-        private void setupUI()
-        {
-            this.scoreUI = SKLabelNode.FromFont("RetroBitmap");
+            this.Add(new FlyingSaucers(this));
 
-            this.scoreUI.Text = "Score: " + this.score.ToString();
-            this.scoreUI.FontSize = 18;
-            this.scoreUI.HorizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Left;
-
-            this.scoreUI.Position = new CGPoint(10, this.Frame.Height - 30);
-
-            this.scoreUI.FontColor = AppKit.NSColor.White;
-
-            this.AddChild(this.scoreUI);
-
-
-            this.livesUI = SKLabelNode.FromFont("RetroBitmap");
-
-            this.livesUI.Text = "Lives: " + this.lives.ToString();
-            this.livesUI.FontSize = 18;
-            this.livesUI.HorizontalAlignmentMode = SKLabelHorizontalAlignmentMode.Right;
-
-            this.livesUI.Position = new CGPoint(this.Frame.Width - 10, this.Frame.Height - 30);
-
-            this.livesUI.FontColor = AppKit.NSColor.White;
-
-            this.AddChild(this.livesUI);
-        }
-
-        private void spawnNewEnemy()
-        {
-            this.enemy = SKSpriteNode.FromImageNamed(NSBundle.MainBundle.PathForResource("graphics/Enemy", "png"));
-            this.enemy.Name = "Enemy";
-
-            this.enemy.PhysicsBody = SKPhysicsBody.CreateCircularBody(100);
-            //this.enemy.PhysicsBody.Dynamic = true;
-            this.enemy.PhysicsBody.AffectedByGravity = false;
-            this.enemy.PhysicsBody.CategoryBitMask = (uint)Types.Enemy;
-            this.enemy.PhysicsBody.CollisionBitMask = 0;
-            this.enemy.PhysicsBody.ContactTestBitMask = (uint)Types.Bullet;
-
-            this.enemy.Position = new CGPoint(0, this.Frame.Height - 40);
-            this.enemy.SetScale(0.5f);
-
-
-            SKAction moveLeft = SKAction.MoveToX(this.Frame.Width, 5);
-            SKAction moveRight = SKAction.MoveToX(0, 5);
-
-            SKAction moveDown = SKAction.MoveBy(0, -50, 0.5);
-
-            SKAction loop = SKAction.Sequence(new SKAction[] { moveLeft, moveDown, moveRight, moveDown });
-
-            this.enemy.RunAction(SKAction.RepeatActionForever(loop));
-
-            this.cueNextEnemyShoot();
-
-            this.AddChild(this.enemy);
-        }
-
-        private void cueNextEnemyShoot()
-        {
-            this.enemy.RunAction(SKAction.WaitForDuration(random.NextDouble() * 2.0f), () =>
-            {
-                this.AddChild(new EnemyBullet(this.enemy));
-
-                this.cueNextEnemyShoot();
-            });
-        }
-
-        private void refreshShields()
-        {
-            this.Add(new Shield(200, 170));
-            this.Add(new Shield(600, 170));
-            this.Add(new Shield(1000, 170));
-            this.Add(new Shield(1400, 170));
-            this.Add(new Shield(1800, 170));
-        }
-
-        private void spawnNewPlayer()
-        {
-            this.player = SKSpriteNode.FromImageNamed(NSBundle.MainBundle.PathForResource("graphics/Spaceship", "png"));
-            this.player.Name = "Player";
-
-            this.player.PhysicsBody = SKPhysicsBody.CreateCircularBody(100);
-            //this.player.PhysicsBody.Dynamic = true;
-            this.player.PhysicsBody.AffectedByGravity = false;
-            this.player.PhysicsBody.CategoryBitMask = (uint)Types.Player;
-            this.player.PhysicsBody.CollisionBitMask = 0;
-            this.player.PhysicsBody.ContactTestBitMask = (uint)Types.EnemyBullet;
-
-            this.player.Position = new CGPoint(this.Frame.Width / 2, 50);
-            this.player.SetScale(0.5f);
-
-            this.AddChild(this.player);
+            this.wave = new Wave(this);
         }
 
         public override void KeyDown(NSEvent theEvent)
         {
-            if (theEvent.CharactersIgnoringModifiers == "z")
-            {
-                this.leftPressed = true;
-            }
-
-            if (theEvent.CharactersIgnoringModifiers == "x")
-            {
-                this.rightPressed = true;
-            }
-
-            if (theEvent.CharactersIgnoringModifiers == "/")
-            {
-                this.firePressed = true;
-            }
+            this.player?.KeyDown(theEvent);
+            this.wave?.KeyDown(theEvent);
 
             if (theEvent.CharactersIgnoringModifiers == "q")
             {
-                this.gameOver();
+                this.lives = 0;
+
+                this.player.explode();
+            }
+            else if (theEvent.CharactersIgnoringModifiers == "e")
+            {
+                Explosion.Spawn(new CGPoint(400, 400), this);
             }
         }
 
         public override void KeyUp(NSEvent theEvent)
         {
-            if (theEvent.CharactersIgnoringModifiers == "z")
-            {
-                this.leftPressed = false;
-            }
-
-            if (theEvent.CharactersIgnoringModifiers == "x")
-            {
-                this.rightPressed = false;
-            }
-
-            if (theEvent.CharactersIgnoringModifiers == "/")
-            {
-                this.firePressed = false;
-            }
+            this.player?.KeyUp(theEvent);
         }
 
         public override void Update(double currentTime)
@@ -187,117 +95,252 @@ namespace SharpVaders
 
             this.lastTime = currentTime;
 
-            if (this.leftPressed)
-            {
-                this.player.Position = new CGPoint(this.player.Position.X - (this.speed * delta), this.player.Position.Y);
-
-                if (this.player.Position.X < 0)
-                {
-                    this.player.Position = new CGPoint(0, this.player.Position.Y);
-                }
-            }
-            else if (this.rightPressed)
-            {
-                this.player.Position = new CGPoint(this.player.Position.X + (this.speed * delta), this.player.Position.Y);
-
-                if (this.player.Position.X > this.Frame.Width)
-                {
-                    this.player.Position = new CGPoint(this.Frame.Width, this.player.Position.Y);
-                }
-            }
-
-            if (this.bullet == null && this.firePressed)
-            {
-                this.bullet = new PlayerBullet(this.player, this);
-
-                this.AddChild(this.bullet);
-            }
+            this.player?.update(delta);
         }
 
-        public void PlayerBulletActionDone()
+        //public override void DidFinishUpdate()
+        //{
+        //    base.DidFinishUpdate();
+
+        //    foreach (SKNode node in this.toRemove)
+        //    {
+        //        node.RemoveFromParent();
+        //    }
+
+        //    this.toRemove.Clear();
+        //}
+
+        //
+
+        private void PlayerBullet_FlyingSaucer_Contact(SKPhysicsContact contact)
         {
-            this.bullet = null;
+            PlayerBullet bullet = null;
+            FlyingSaucer saucer = null;
+
+            if (contact.BodyA.CategoryBitMask == (uint)Types.FlyingSaucer)
+            {
+                bullet = (PlayerBullet)contact.BodyB.Node;
+                saucer = (FlyingSaucer)contact.BodyA.Node;
+            }
+            else
+            {
+                bullet = (PlayerBullet)contact.BodyA.Node;
+                saucer = (FlyingSaucer)contact.BodyB.Node;
+            }
+
+            this.score = this.score + saucer.value;
+
+            bullet.hit();
+            saucer.hit();
+
+            Explosion.Spawn(saucer);
+
+            //this.toRemove.Add(bullet);
+            //this.toRemove.Add(saucer);
+
+            bullet.RemoveFromParent();
+            saucer.RemoveFromParent();
         }
 
-        private void EnemyBulletContact(SKPhysicsContact contact)
+        private void PlayerBullet_Enemy_Contact(SKPhysicsContact contact)
+        {
+            PlayerBullet bullet = null;
+            Enemy enemy = null;
+
+            if (contact.BodyA.CategoryBitMask == (uint)Types.Enemy)
+            {
+                bullet = (PlayerBullet)contact.BodyB.Node;
+                enemy = (Enemy)contact.BodyA.Node;
+            }
+            else
+            {
+                bullet = (PlayerBullet)contact.BodyA.Node;
+                enemy = (Enemy)contact.BodyB.Node;
+            }
+
+            this.score = this.score + enemy.value;
+
+            bullet.hit();
+            enemy.hit();
+
+            Explosion.Spawn(enemy);
+
+            //this.toRemove.Add(bullet);
+            //this.toRemove.Add(enemy);
+
+            bullet.RemoveFromParent();
+            enemy.RemoveFromParent();
+        }
+
+        private void PlayerBullet_Shield_Contact(SKPhysicsContact contact)
+        {
+            PlayerBullet bullet = null;
+            
+            if (contact.BodyA.CategoryBitMask == (uint)Types.PlayerBullet)
+            {
+                bullet = (PlayerBullet)contact.BodyA.Node;
+            }
+            else
+            {
+                bullet = (PlayerBullet)contact.BodyB.Node; 
+            }
+
+            bullet.hit();
+            
+            contact.BodyB.Node.RemoveFromParent();
+            contact.BodyA.Node.RemoveFromParent();
+        }
+
+        private void PlayerBullet_EnemyBullet_Contact(SKPhysicsContact contact)
+        {
+            PlayerBullet bullet = null;
+
+            if (contact.BodyA.CategoryBitMask == (uint)Types.PlayerBullet)
+            {
+                bullet = (PlayerBullet)contact.BodyA.Node;
+            }
+            else
+            {
+                bullet = (PlayerBullet)contact.BodyB.Node;
+            }
+
+            bullet.hit();
+
+            Explosion.Spawn(bullet);
+
+            contact.BodyB.Node.RemoveFromParent();
+            contact.BodyA.Node.RemoveFromParent();
+        }
+
+        private void EnemyBullet_Shield_Contact(SKPhysicsContact contact)
         {
             contact.BodyB.Node.RemoveFromParent();
             contact.BodyA.Node.RemoveFromParent();
-
-            this.bullet = null;
-
-            this.score = this.score + 100;
-
-            this.scoreUI.Text = "Score: " + this.score.ToString();
-
-            this.spawnNewEnemy();
         }
 
-        private void EnemyBulletShieldContact(SKPhysicsContact contact)
+        private void EnemyBullet_Player_Contact(SKPhysicsContact contact)
         {
-            contact.BodyB.Node.RemoveFromParent();
-            contact.BodyA.Node.RemoveFromParent();
+            Player player = null;
+
+            if (contact.BodyA.CategoryBitMask == (uint)Types.Player)
+            {
+                player = (Player)contact.BodyA.Node;
+
+                contact.BodyB.Node.RemoveFromParent();
+            }
+            else
+            {
+                player = (Player)contact.BodyB.Node;
+
+                contact.BodyA.Node.RemoveFromParent();
+            }
+
+            player.explode();
         }
 
-        private void EnemyBulletPlayerContact(SKPhysicsContact contact)
+        private void Enemy_Shield_Contact(SKPhysicsContact contact)
         {
-            if (contact.BodyA.CategoryBitMask == (uint)Types.EnemyBullet) contact.BodyA.Node.RemoveFromParent();
-            if (contact.BodyB.CategoryBitMask == (uint)Types.EnemyBullet) contact.BodyB.Node.RemoveFromParent();
+            if (contact.BodyA.CategoryBitMask == (uint)Types.Shield) contact.BodyA.Node.RemoveFromParent();
+            else contact.BodyB.Node.RemoveFromParent();
+        }
+
+        private void Enemy_Player_Contact(SKPhysicsContact contact)
+        {
+            Player player = null;
+
+            if (contact.BodyA.CategoryBitMask == (uint)Types.Player)
+            {
+                player = (Player)contact.BodyA.Node;
+
+                contact.BodyB.Node.RemoveFromParent();
+            }
+            else
+            {
+                player = (Player)contact.BodyB.Node;
+
+                contact.BodyA.Node.RemoveFromParent();
+            }
+
+            player.explode();
+
+            this.wave.reset();
+        }
+
+        //
+
+        private bool test(SKPhysicsContact contact, Types t1, Types t2)
+        {
+            if (contact.BodyA == null) return false;
+            if (contact.BodyB == null) return false;
+
+            if (contact.BodyA.Node == null) return false;
+            if (contact.BodyB.Node == null) return false;
+
+            return (contact.BodyA.CategoryBitMask == (uint)t1 && contact.BodyB.CategoryBitMask == (uint)t2) || (contact.BodyA.CategoryBitMask == (uint)t2 && contact.BodyB.CategoryBitMask == (uint)t1);
+        }
+
+        //
+
+        public void DidBeginContact(SKPhysicsContact contact)
+        {
+            if (this.test(contact, Types.PlayerBullet, Types.FlyingSaucer)) this.PlayerBullet_FlyingSaucer_Contact(contact);
+
+            else if (this.test(contact, Types.PlayerBullet, Types.Enemy)) this.PlayerBullet_Enemy_Contact(contact);
+
+            else if (this.test(contact, Types.PlayerBullet, Types.Shield)) this.PlayerBullet_Shield_Contact(contact);
+
+            else if (this.test(contact, Types.PlayerBullet, Types.EnemyBullet)) this.PlayerBullet_EnemyBullet_Contact(contact);
+
+            else if (this.test(contact, Types.EnemyBullet, Types.Shield)) this.EnemyBullet_Shield_Contact(contact);
+
+            else if (this.test(contact, Types.EnemyBullet, Types.Player)) this.EnemyBullet_Player_Contact(contact);
+
+            else if (this.test(contact, Types.Enemy, Types.Shield)) this.Enemy_Shield_Contact(contact);
+
+            else if (this.test(contact, Types.Enemy, Types.Player)) this.Enemy_Player_Contact(contact);
+
+            // https://stackoverflow.com/questions/40593678/what-are-sprite-kits-category-mask-and-collision-mask
+        }
+
+        public void waveDestroyed()
+        {
+            this.score = this.score + this.wave.value;
+
+            this.wave.RemoveFromParent();
+
+            this.wave = new Wave(this);
+
+            this.shields.refreshShields();
+        }
+
+        public void playerWasDestroyed()
+        {
+            this.player = null;
 
             this.lives--;
 
             if (this.lives < 0)
             {
-                this.gameOver();
+                this.RunAction(SKAction.WaitForDuration(3), () =>
+                {
+                    // TODO play a little animation, lock input while it plays?
+
+                    this.gameOver();
+                });
             }
             else
             {
-                this.livesUI.Text = "Lives: " + this.lives.ToString();
+                this.RunAction(SKAction.WaitForDuration(3), () =>
+                {
+                    this.player = new Player(this);
+
+                    this.shields.refreshShields();
+                });
             }
         }
-
-        private void BulletShieldContact(SKPhysicsContact contact)
-        {
-            contact.BodyB.Node.RemoveFromParent();
-            contact.BodyA.Node.RemoveFromParent();
-
-            this.bullet = null;
-        }
-
-        private bool test(SKPhysicsContact contact, Types t1, Types t2)
-        {
-            return (contact.BodyA.CategoryBitMask == (uint)t1 && contact.BodyB.CategoryBitMask == (uint)t2) || (contact.BodyA.CategoryBitMask == (uint)t2 && contact.BodyB.CategoryBitMask == (uint)t1);
-        }
-
-        public void DidBeginContact(SKPhysicsContact contact)
-        {
-            if (this.test(contact, Types.Enemy, Types.Bullet))
-            {
-                this.EnemyBulletContact(contact);
-            }
-
-            if (this.test(contact, Types.EnemyBullet, Types.Shield))
-            {
-                this.EnemyBulletShieldContact(contact);
-            }
-
-            if (this.test(contact, Types.Bullet, Types.Shield))
-            {
-                this.BulletShieldContact(contact);
-            }
-
-            if (this.test(contact, Types.EnemyBullet, Types.Player))
-            {
-                this.EnemyBulletPlayerContact(contact);
-            }
-        }
-
-        public override void DidSimulatePhysics() { }
 
         private void gameOver()
         {
-            // TODO play a little animation, lock input while it plays?
-
             HighScores highscores = new HighScores();
 
             if (highscores.isNewHighScore(this.score))

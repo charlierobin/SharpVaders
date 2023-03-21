@@ -8,35 +8,46 @@ namespace SharpVaders
 {
     public class PlayerBullet : SKSpriteNode
     {
-        private SKAction action;
+        private static SKAction action;
+
+        private float time = 1;
 
         private SceneGame game;
 
-        public PlayerBullet(SKSpriteNode player, SceneGame game)
+        private Player player;
+
+        public PlayerBullet(SceneGame game, Player player) : base(texture: SKTexture.FromImageNamed(NSBundle.MainBundle.PathForResource("graphics/bullet", "png")))
         {
             this.game = game;
+            this.player = player;
 
-            this.action = SKAction.MoveToY(this.game.Frame.Height, 0.5);
+            this.Name = "Bullet";
 
-            this.Add(SKSpriteNode.FromImageNamed(NSBundle.MainBundle.PathForResource("graphics/Bullet", "png")));
-
-            this.PhysicsBody = SKPhysicsBody.CreateCircularBody(60);
-            //this.PhysicsBody.Dynamic = true;
+            this.PhysicsBody = SKPhysicsBody.CreateCircularBody(100);
             this.PhysicsBody.AffectedByGravity = false;
-            this.PhysicsBody.CategoryBitMask = (uint)Types.Bullet;
-            this.PhysicsBody.CollisionBitMask = 0;
-            this.PhysicsBody.ContactTestBitMask = (uint)Types.Enemy + (uint)Types.Shield;
 
-            this.Position = player.Position;
+            this.PhysicsBody.CategoryBitMask = (uint)Types.PlayerBullet;
+            this.PhysicsBody.CollisionBitMask = (uint)Types.Nothing;
+            this.PhysicsBody.ContactTestBitMask = (uint)Types.Enemy + (uint)Types.FlyingSaucer + (uint)Types.Shield + (uint)Types.EnemyBullet;
 
-            this.SetScale(0.5f);
+            this.SetScale(0.08f);
 
-            this.RunAction(this.action, () =>
+            if (PlayerBullet.action == null)
             {
-                this.RemoveFromParent();
+                PlayerBullet.action = SKAction.MoveToY(this.game.Frame.Height, this.time);
+            }
 
-                this.game.PlayerBulletActionDone();
+            this.RunAction(PlayerBullet.action, () =>
+            {
+                this.player.bulletDestroyed();
+
+                this.RemoveFromParent();
             });
+        }
+
+        public void hit()
+        {
+            this.player.bulletDestroyed();
         }
     }
 }
