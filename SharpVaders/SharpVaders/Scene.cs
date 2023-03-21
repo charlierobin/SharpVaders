@@ -12,7 +12,7 @@ namespace SharpVaders
         public Dictionary<string, string> data = new Dictionary<string, string>();
 
         private Button focussed;
-        private Button rolledOver;
+        //private Button rolledOver;
 
         private List<Button> buttons = new List<Button>();
 
@@ -77,7 +77,7 @@ namespace SharpVaders
             this.focusHighlight.Position = CGPoint.Subtract(this.focussed.Position, new CGSize(100, 50));
         }
 
-        public void PerformAction(string name)
+        public void PerformAction(string name, int score = 0)
         {
             switch (name)
             {
@@ -110,6 +110,21 @@ namespace SharpVaders
                 case "buttonQuit":
                     {
                         NSApplication.SharedApplication.Terminate(null);
+
+                        break;
+                    }
+
+                case "enterNewHighScore":
+                    {
+                        SKTransition transition = SKTransition.CrossFadeWithDuration(2);
+
+                        Scene scene = SKNode.FromFile<SceneEnterNewHighScore>("SceneEnterNewHighScore");
+
+                        scene.data["score"] = score.ToString();
+
+                        scene.ScaleMode = SKSceneScaleMode.AspectFit;
+
+                        this.View.PresentScene(scene, transition);
 
                         break;
                     }

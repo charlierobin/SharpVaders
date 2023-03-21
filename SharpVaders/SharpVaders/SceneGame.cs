@@ -43,7 +43,7 @@ namespace SharpVaders
         private Player player;
         private Shields shields;
         private Wave wave;
-        
+
         private double lastTime;
 
         //private List<SKNode> toRemove = new List<SKNode>();
@@ -175,18 +175,18 @@ namespace SharpVaders
         private void PlayerBullet_Shield_Contact(SKPhysicsContact contact)
         {
             PlayerBullet bullet = null;
-            
+
             if (contact.BodyA.CategoryBitMask == (uint)Types.PlayerBullet)
             {
                 bullet = (PlayerBullet)contact.BodyA.Node;
             }
             else
             {
-                bullet = (PlayerBullet)contact.BodyB.Node; 
+                bullet = (PlayerBullet)contact.BodyB.Node;
             }
 
             bullet.hit();
-            
+
             contact.BodyB.Node.RemoveFromParent();
             contact.BodyA.Node.RemoveFromParent();
         }
@@ -266,8 +266,6 @@ namespace SharpVaders
             this.wave.reset();
         }
 
-        //
-
         private bool test(SKPhysicsContact contact, Types t1, Types t2)
         {
             if (contact.BodyA == null) return false;
@@ -278,8 +276,6 @@ namespace SharpVaders
 
             return (contact.BodyA.CategoryBitMask == (uint)t1 && contact.BodyB.CategoryBitMask == (uint)t2) || (contact.BodyA.CategoryBitMask == (uint)t2 && contact.BodyB.CategoryBitMask == (uint)t1);
         }
-
-        //
 
         public void DidBeginContact(SKPhysicsContact contact)
         {
@@ -345,15 +341,7 @@ namespace SharpVaders
 
             if (highscores.isNewHighScore(this.score))
             {
-                SKTransition transition = SKTransition.CrossFadeWithDuration(2);
-
-                Scene scene = SKNode.FromFile<SceneEnterNewHighScore>("SceneEnterNewHighScore");
-
-                scene.data["score"] = this.score.ToString();
-
-                scene.ScaleMode = SKSceneScaleMode.AspectFill;
-
-                this.View.PresentScene(scene, transition);
+                this.PerformAction("enterNewHighScore", this.score);
             }
             else
             {

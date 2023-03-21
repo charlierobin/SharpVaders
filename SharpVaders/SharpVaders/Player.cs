@@ -11,8 +11,6 @@ namespace SharpVaders
     {
         private float speed = 600;
 
-        private double lastTime;
-
         private SceneGame game;
 
         private PlayerBullet bullet;

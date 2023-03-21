@@ -8,7 +8,7 @@ namespace SharpVaders
 {
     public class Shield : SKSpriteNode
     {
-        public Shield(SceneGame game, int x, int y) : base()
+        public Shield(SceneGame game, float x, float y) : base()
         {
             this.Name = "Shield";
 
