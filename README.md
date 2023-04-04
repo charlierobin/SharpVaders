@@ -6,3 +6,4 @@ There are still some rough edges to be sanded down: the final pixellations on th
 
 https://user-images.githubusercontent.com/10506323/229731222-f9e971f0-4d5f-4a36-8d9b-fc7a7b020e0e.mp4
 
+But it broadly encompasses everything I wanted to look at when I started out: buttons (SKSpriteNodes) with clicks and rollovers, buttons with simple keyboard navigation, entry and storing of high scores: the basics for a simple arcade-type game.
