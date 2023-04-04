@@ -11,8 +11,56 @@ namespace SharpVaders
     {
         public Dictionary<string, string> data = new Dictionary<string, string>();
 
-        private Button focussed;
-        //private Button rolledOver;
+        private Button _focussed;
+        
+        private Button focussed
+        {
+            get { return this._focussed; }
+            set
+            {
+                this.focusHighlight?.RemoveFromParent();
+
+                this._focussed = value;
+
+                this.focusHighlight = SKShapeNode.FromRect(this.focussed.Frame.Size);
+
+                this.focusHighlight.FillColor = NSColor.White;
+
+                this.focusHighlight.LineWidth = 4;
+
+                this.focusHighlight.Alpha = 0.2f;
+
+                this.Add(this.focusHighlight);
+
+                this.focusHighlight.Position = this.focussed.Position;
+
+                this.focusHighlight.ZPosition = -100;
+            }
+        }
+
+        private Button _rolledOver;
+
+        private Button rolledOver
+        {
+            get { return this._rolledOver; }
+            set
+            {
+                if (value != this._rolledOver)
+                {
+                    if (this._rolledOver != null)
+                    {
+                        this._rolledOver.highlighted = false;
+                    }
+
+                    this._rolledOver = value;
+
+                    if (this._rolledOver != null)
+                    {
+                        this._rolledOver.highlighted = true;
+                    }
+                }
+            }
+        }
 
         private List<Button> buttons = new List<Button>();
 
@@ -20,19 +68,19 @@ namespace SharpVaders
 
         public Scene(IntPtr handle) : base(handle) { }
 
+        public override void DidMoveToView(SKView view)
+        {
+            base.DidMoveToView(view);
+
+            NSTrackingAreaOptions options = NSTrackingAreaOptions.MouseMoved | NSTrackingAreaOptions.ActiveInKeyWindow;
+
+            NSTrackingArea trackingArea = new NSTrackingArea(view.Frame, options, this, null);
+
+            view.AddTrackingArea(trackingArea);
+        }
+
         public void AddButton(Button button)
         {
-            if (this.focusHighlight == null)
-            {
-                this.focusHighlight = SKShapeNode.FromRect(new CGRect(0, 0, 200, 100));
-
-                this.focusHighlight.FillColor = NSColor.White;
-
-                this.focusHighlight.Alpha = 0.2f;
-
-                this.Add(this.focusHighlight);
-            }
-
             this.AddChild(button);
 
             this.buttons.Add(button);
@@ -40,8 +88,6 @@ namespace SharpVaders
             if (this.buttons.Count == 1)
             {
                 this.focussed = this.buttons[0];
-
-                this.focusHighlight.Position = CGPoint.Subtract(this.focussed.Position, new CGSize(100, 50));
             }
         }
 
@@ -57,8 +103,6 @@ namespace SharpVaders
             }
 
             this.focussed = this.buttons[pos];
-
-            this.focusHighlight.Position = CGPoint.Subtract(this.focussed.Position, new CGSize(100, 50));
         }
 
         private void moveFocusToNext()
@@ -73,8 +117,6 @@ namespace SharpVaders
             }
 
             this.focussed = this.buttons[pos];
-
-            this.focusHighlight.Position = CGPoint.Subtract(this.focussed.Position, new CGSize(100, 50));
         }
 
         public void PerformAction(string name, int score = 0)
@@ -128,16 +170,23 @@ namespace SharpVaders
 
                         break;
                     }
+
+                default:
+                    {
+                        Console.WriteLine("Unhandled in PerformAction: " + name);
+
+                        break;
+                    }
             }
         }
 
         public override void KeyDown(NSEvent theEvent)
         {
-            Console.WriteLine(theEvent.KeyCode.ToString());
+            //Console.WriteLine(theEvent.KeyCode.ToString());
 
-            if (theEvent.KeyCode == 36 || theEvent.KeyCode == 48 || theEvent.CharactersIgnoringModifiers == "/")
+            if (theEvent.KeyCode == 36 || theEvent.CharactersIgnoringModifiers == "/" || theEvent.CharactersIgnoringModifiers == " ")
             {
-                // return, tab
+                // return
 
                 this.PerformAction(this.focussed.Name);
             }
@@ -147,12 +196,35 @@ namespace SharpVaders
 
                 this.moveFocusToPrevious();
             }
-            else if (theEvent.CharactersIgnoringModifiers == "x" || theEvent.KeyCode == 125 || theEvent.KeyCode == 124)
+            else if (theEvent.CharactersIgnoringModifiers == "x" || theEvent.KeyCode == 125 || theEvent.KeyCode == 124 || theEvent.KeyCode == 48)
             {
-                // down arrow, right arrow
+                // down arrow, right arrow, tab
 
                 this.moveFocusToNext();
             }
+        }
+
+        public override void MouseMoved(NSEvent theEvent)
+        {
+            //base.MouseMoved(theEvent);
+
+            CGPoint loc = theEvent.LocationInNode(this);
+
+            SKNode node = this.GetNodeAtPoint(loc);
+
+            if(node is Button)
+            {
+                this.rolledOver = (Button)node;
+            }
+            else
+            {
+                this.rolledOver = null;
+            }
+
+            //Button test = node as Button;
+
+            //this.rolledOver = test;
+
         }
     }
 }

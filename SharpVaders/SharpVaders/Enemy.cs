@@ -2,6 +2,7 @@
 using CoreGraphics;
 using Foundation;
 using SpriteKit;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace SharpVaders
 {
@@ -18,6 +19,8 @@ namespace SharpVaders
 
         private double minTimeIntervalInSeconds = 5;
         private double maxTimeIntervalInSeconds = 25;
+
+        private SKTexture[] textures = new SKTexture[2];
 
         public Enemy(SceneGame game, Wave wave, nfloat x, nfloat y, int value, string texture) : base(texture: SKTexture.FromImageNamed(NSBundle.MainBundle.PathForResource(texture, "png")))
         {
@@ -42,6 +45,13 @@ namespace SharpVaders
             this.startY = y;
 
             this.game.Add(this);
+
+            this.textures[0] = SKTexture.FromImageNamed(NSBundle.MainBundle.PathForResource(texture, "png"));
+            this.textures[1] = SKTexture.FromImageNamed(NSBundle.MainBundle.PathForResource(texture + "-alt", "png"));
+            
+            SKAction animation = SKAction.AnimateWithTextures(this.textures, 0.5);
+
+            this.RunAction(SKAction.RepeatActionForever(animation));
 
             this.cueNextBombDrop();
         }

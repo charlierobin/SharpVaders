@@ -21,6 +21,8 @@ namespace SharpVaders
 
         public Player(SceneGame game) : base(texture: SKTexture.FromImageNamed(NSBundle.MainBundle.PathForResource("graphics/player", "png")))
         {
+            this.Texture.UsesMipmaps = true;
+
             this.game = game;
 
             this.Name = "Player";

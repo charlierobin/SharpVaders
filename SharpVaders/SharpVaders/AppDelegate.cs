@@ -10,7 +10,7 @@ namespace SharpVaders
     {
         public override void DidFinishLaunching(NSNotification notification)
         {
-            SKScene scene = SKNode.FromFile<SceneGame>("SceneGame");
+            SKScene scene = SKNode.FromFile<SceneIntroMenu>("SceneIntroMenu");
 
             scene.ScaleMode = SKSceneScaleMode.AspectFit;
 
@@ -18,10 +18,10 @@ namespace SharpVaders
 
             MyGameView.IgnoresSiblingOrder = true;
 
-            MyGameView.ShowsFPS = true;
-            MyGameView.ShowsNodeCount = true;
+            //MyGameView.ShowsFPS = true;
+            //MyGameView.ShowsNodeCount = true;
 
-            MyGameView.ShowsPhysics = true;
+            //MyGameView.ShowsPhysics = true;
         }
 
         public override bool ApplicationShouldTerminateAfterLastWindowClosed(NSApplication sender)
